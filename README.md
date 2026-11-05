@@ -3,7 +3,7 @@ Projektarbeit im Modul 'Grundlagen der Medizintechnik' über die Messung und Aus
 
 # Vorbereitung
 
-Mit einem EKG-Gerät soll die Herzfrequenz während eines Videospiels gemessen und mit einem Python-Skript ausgewertet und dargestellt werden. Der verwendete Kampf wird der 'Trial of the Warrior' sein, bei dem in 12 Wellen verschiedene Gegner erscheinen. Dieser Kampf eignet sich besonders gut, um ein hohes Stresslevel zu erhalten, da die Gegner immer schwerer werden, beziehungsweise die Arena, in der der Kampf ausgetragen wird sich verändert. Parallel zur Messung wird der Kampf aufgezeichnet um die Ereignisse in Relation zur Herzfrequenz zu setzen. Der Ablauf der Messung soll wie folgt ablaufen:
+Mit einem EKG-Gerät soll die Herzfrequenz während eines Videospiels gemessen und mit einem Python-Skript ausgewertet und dargestellt werden. Der verwendete Kampf wird der 'Trial of the Warrior' sein, bei dem in 12 Wellen verschiedene Gegner erscheinen. Dieser Kampf eignet sich besonders gut, um ein hohes Stresslevel zu erhalten, da die Gegner immer schwerer werden, beziehungsweise die Arena, in der der Kampf ausgetragen wird sich verändert. Parallel zur Messung wird der Kampf aufgezeichnet um die Ereignisse in Relation zur Herzfrequenz zu setzen.
 
 ## Einschränkungen
 
@@ -38,9 +38,19 @@ Mit einem EKG-Gerät soll die Herzfrequenz während eines Videospiels gemessen u
 
 ## Nachbereitung
 
+- Auslesen der Daten: EKG an Laptop anbinden und Daten aus dem Speicher herauskopieren
 - Backup der Messdaten
 
 # Ergebnisse
+
+- Darstellung in selbst geschriebener (AI-assisted) Anwendung, die Video abspielen lässt und parallel dazu die Herzfrequenz darstellt.
+- Anwendung soll mit docker compose ausführbar sein
+- gleitender Mittelwert über kleine Fenster (30 sek -> ermitteln bis typische Schwankung)
+- in literatur nachlesen, wie Herzfrequenz ermittelt werden soll über die Zeit 
+- zuerst ausprobieren, wie die Auswertung passieren soll
+- statistischer Test sollte im idealfall nur einmal stattfinden (in Forschungsarbeit)
+- Linie zeigt 5 sek früher und später
+- auch ableitung?
 
 # Diskussion
 
