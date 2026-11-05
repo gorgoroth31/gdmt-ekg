@@ -1,4 +1,4 @@
-"""FastAPI-Backend: Dateibrowser, EKG-Analyse und Video-Streaming."""
+"""FastAPI-Backend: Uploads, EKG-Analyse und Video-Streaming."""
 
 from __future__ import annotations
 
@@ -100,34 +100,6 @@ def _measurement_for(folder_rel: str, record_no: int, fs: float):
     return measurement
 
 
-@app.get("/api/browse")
-def browse(path: str = "") -> dict:
-    """Verzeichnisinhalt für die Dateiauswahl auflisten."""
-    full = _abs(path)
-    if not os.path.isdir(full):
-        raise HTTPException(status_code=404, detail="Ordner nicht gefunden")
-    entries = []
-    for name in sorted(os.listdir(full), key=str.lower):
-        p = os.path.join(full, name)
-        if os.path.isdir(p):
-            entries.append({"name": name, "type": "dir", "path": _rel(p)})
-        elif os.path.isfile(p):
-            ext = os.path.splitext(name)[1].lower()
-            entries.append(
-                {
-                    "name": name,
-                    "type": "video" if ext in VIDEO_EXTS else "file",
-                    "path": _rel(p),
-                    "size": os.path.getsize(p),
-                }
-            )
-    return {
-        "path": _rel(full),
-        "parent": _rel(os.path.dirname(full)) if _rel(full) else None,
-        "entries": entries,
-    }
-
-
 def _save_upload(upload: UploadFile, dest_dir: str) -> str:
     """Upload-Datei unter dest_dir ablegen, Rückgabe des Zielpfads."""
     name = os.path.basename(upload.filename or "").strip()
@@ -190,6 +162,47 @@ def upload_ecg(
         "files": sorted(saved),
         "scp_count": scp_count,
     }
+
+
+@app.post("/api/upload/clear")
+def upload_clear(
+    video: str | None = Form(None), session: str | None = Form(None)
+) -> dict:
+    """Hochgeladene Dateien (Upload-Cache) löschen und Auswahl zurücksetzen.
+
+    'session' entfernt die EKG-Upload-Session (uploads/e-…), 'video' die
+    hochgeladene Videodatei (uploads/v-…). Serverseitige Analyse-Caches der
+    betroffenen Ordner werden ebenfalls verworfen.
+    """
+    deleted: list[str] = []
+    if session is not None:
+        if not re.fullmatch(r"e-[0-9a-f]{6,32}", session):
+            raise HTTPException(status_code=400, detail="Ungültige Session-ID")
+        dest = os.path.join(UPLOAD_DIR, session)
+        if os.path.isdir(dest):
+            rel_dest = _rel(dest)
+            shutil.rmtree(dest)
+            deleted.append(rel_dest)
+            with _lock:
+                for key in [k for k in _analysis_cache if k.split("|", 1)[0] == rel_dest]:
+                    del _analysis_cache[key]
+                for key in [k for k in _record_cache if k[0] == rel_dest]:
+                    del _record_cache[key]
+    if video is not None:
+        full = _abs(video)
+        up_root = os.path.normpath(UPLOAD_DIR)
+        inside = full.startswith(up_root + os.sep) and os.path.isfile(full)
+        if not inside:
+            raise HTTPException(
+                status_code=400, detail="Nur hochgeladene Dateien können gelöscht werden"
+            )
+        folder = os.path.normpath(os.path.dirname(full))
+        if folder == up_root:
+            os.unlink(full)
+        else:
+            shutil.rmtree(folder)
+        deleted.append(_rel(full))
+    return {"deleted": deleted}
 
 
 @app.get("/api/measurements")

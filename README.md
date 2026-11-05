@@ -77,9 +77,11 @@ Danach im Browser öffnen: <http://localhost:8000>
 
 ### Bedienung
 
-1. **Video auswählen**: Datei im eingebauten Dateibrowser wählen **oder** direkt im Browser hochladen (Drag & Drop bzw. Klick auf die Upload-Zone).
-2. **EKG-Daten auswählen**: Ordner mit den SCP-Dateien wählen **oder** die SCP-Dateien zusammen mit der `README.TXT` des Geräts per Drag & Drop hochladen (Mehrfachauswahl). Die Uploads landen in einer **Session** unter `uploads/`: Dateien können auch in mehreren Schritten hochgeladen werden — z. B. erst nur die `README.TXT` und später die zugehörigen `.scp`-Dateien (solange keine SCP-Dateien vorliegen, erscheint ein Hinweis und die Messungsliste aktualisiert sich nach jedem Upload). Die der Messung zugehörigen Dateien werden anhand der `README.TXT` ermittelt ("From–To"); ohne `README.TXT` werden alle hochgeladenen SCP-Dateien als eine Messung interpretiert. Hochgeladene Dateien werden nach 24 Stunden automatisch bereinigt.
+1. **Video hochladen**: Datei per Drag & Drop auf die Upload-Zone ziehen oder Zone anklicken (MP4/WebM).
+2. **EKG-Daten hochladen**: SCP-Dateien zusammen mit der `README.TXT` des Geräts per Drag & Drop hochladen (Mehrfachauswahl). Die Uploads landen in einer **Session** unter `uploads/`: Dateien können auch in mehreren Schritten hochgeladen werden — z. B. erst nur die `README.TXT` und später die zugehörigen `.scp`-Dateien (solange keine SCP-Dateien vorliegen, erscheint ein Hinweis und die Messungsliste aktualisiert sich nach jedem Upload). Die der Messung zugehörigen Dateien werden anhand der `README.TXT` ermittelt ("From–To"); ohne `README.TXT` werden alle hochgeladenen SCP-Dateien als eine Messung interpretiert. Hochgeladene Dateien werden nach 24 Stunden automatisch bereinigt.
 3. **Wiedergabe starten**: Das Video läuft mit normalen Player-Controls; darunter läuft synchron die EKG-Auswertung.
+
+Mit **Cache löschen** werden alle in dieser Session hochgeladenen Dateien serverseitig entfernt und die Auswahl zurückgesetzt.
 
 Darstellungs-Modi (Tabs unter dem Video):
 
@@ -110,8 +112,9 @@ http://localhost:8000/?video=videos/kampf.mp4&ecg=beispieldaten&record=1&offset=
   Integration, adaptive Schwellwerte mit Refraktärzeit und Searchback; danach
   Herzfrequenz aus den RR-Intervallen. Validierung gegen die Geräte-Marken der
   Beispieldaten: 94 % Übereinstimmung, mittlere Lageabweichung ca. 1 Sample.
-- `app/main.py` – FastAPI-Backend: Dateibrowser, Upload-Endpoints (Dateien landen
-  unter `/data/uploads`, Bereinigung nach 24 Stunden), Messungs-Erkennung,
+- `app/main.py` – FastAPI-Backend: Upload-Endpoints (Dateien landen unter
+  `/data/uploads`, Bereinigung nach 24 Stunden, Löschen per Cache-Button),
+  Messungs-Erkennung,
   Analyse-Endpoint, Video-Streaming mit HTTP-Range (Spulen), statisches Frontend
   (Dark Mode, abgerundete Ecken) in `app/static/`.
 

@@ -36,93 +36,6 @@ async function api(path) {
   return res.json();
 }
 
-/* ================= Datei-Browser-Modal ================= */
-const browser = { mode: null, path: "", entries: [], selected: null };
-
-function openBrowser(mode) {
-  browser.mode = mode;
-  browser.path = "";
-  browser.selected = null;
-  $("modal-title").textContent = mode === "video" ? "Video auswählen" : "EKG-Ordner auswählen";
-  $("modal-folder-confirm").hidden = mode === "folder";
-  $("modal").hidden = false;
-  doBrowse("");
-}
-
-function closeBrowser() {
-  $("modal").hidden = true;
-}
-
-async function doBrowse(path) {
-  $("modal-status").textContent = "";
-  try {
-    const res = await api(`/api/browse?path=${encodeURIComponent(path)}`);
-    browser.path = res.path;
-    browser.entries = res.entries;
-    renderBrowser();
-  } catch (e) {
-    $("modal-status").textContent = `Fehler: ${e.message}`;
-  }
-}
-
-function renderBrowser() {
-  const bc = $("breadcrumb");
-  bc.replaceChildren();
-  const root = el("span", "crumb", "/ Datenordner");
-  root.onclick = () => doBrowse("");
-  bc.append(root);
-  const parts = browser.path ? browser.path.split("/") : [];
-  let acc = "";
-  parts.forEach((p) => {
-    acc = acc ? `${acc}/${p}` : p;
-    bc.append(" › ");
-    const s = el("span", "crumb", p);
-    const target = acc;
-    s.onclick = () => doBrowse(target);
-    bc.append(s);
-  });
-
-  const list = $("browser-list");
-  list.replaceChildren();
-  if (!browser.entries.length) {
-    list.append(el("div", "modal-empty", "Ordner ist leer"));
-  }
-  browser.entries.forEach((entry) => {
-    if (entry.type === "dir") {
-      const item = el("div", "browser-item");
-      const ico = el("span", "ico", "📁");
-      const name = el("span", "", entry.name);
-      item.append(ico, name);
-      item.onclick = () => doBrowse(entry.path);
-      list.append(item);
-    } else if (browser.mode === "video" && entry.type === "video") {
-      const item = el("div", "browser-item");
-      item.append(el("span", "ico", "🎬"), el("span", "", entry.name), el("span", "size", fmtSize(entry.size)));
-      item.onclick = () => {
-        state.videoPath = entry.path;
-        $("pick-video-label").textContent = entry.path;
-        $("pick-video-label").classList.remove("empty");
-        closeBrowser();
-        refreshStart();
-      };
-      list.append(item);
-    }
-  });
-}
-
-$("modal-close").onclick = closeBrowser;
-
-$("btn-pick-video").onclick = () => openBrowser("video");
-$("btn-pick-ecg").onclick = () => openBrowser("folder");
-$("modal-folder-confirm").onclick = () => {
-  state.ecgFolder = browser.path;
-  state.ecgSession = null;
-  $("pick-ecg-label").textContent = state.ecgFolder || "/ (Datenordner)";
-  $("pick-ecg-label").classList.remove("empty");
-  closeBrowser();
-  loadRecords();
-};
-
 /* ================= Upload (Drag & Drop / Klick) ================= */
 function wireDropzone(zoneId, inputId, onFiles) {
   const zone = $(zoneId);
@@ -206,9 +119,44 @@ wireDropzone("drop-ecg", "file-ecg", async (files) => {
   }
 });
 
+/* ================= Cache löschen ================= */
+$("btn-clear").onclick = async () => {
+  const btn = $("btn-clear");
+  const videoUploaded = state.videoPath && state.videoPath.startsWith("uploads/");
+  if (videoUploaded || state.ecgSession) {
+    const fd = new FormData();
+    if (videoUploaded) fd.append("video", state.videoPath);
+    if (state.ecgSession) fd.append("session", state.ecgSession);
+    btn.disabled = true;
+    try {
+      const res = await fetch("/api/upload/clear", { method: "POST", body: fd });
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try { msg = (await res.json()).detail ?? msg; } catch (_e) { /* ignore */ }
+        throw new Error(msg);
+      }
+    } catch (e) {
+      alert(`Cache konnte nicht gelöscht werden: ${e.message}`);
+      return;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+  state.videoPath = null;
+  state.ecgFolder = null;
+  state.ecgSession = null;
+  state.records = [];
+  state.recordNo = null;
+  $("pick-video-label").textContent = "Noch kein Video hochgeladen";
+  $("pick-video-label").classList.add("empty");
+  $("pick-ecg-label").textContent = "Noch keine EKG-Dateien hochgeladen";
+  $("pick-ecg-label").classList.add("empty");
+  $("record-row").hidden = true;
+  $("record-note").hidden = true;
+  refreshStart();
+};
+
 document.addEventListener("keydown", (ev) => {
-  if (ev.key === "Escape" && !$("modal").hidden) closeBrowser();
-  if (!$("modal").hidden) return;
   if (ev.target.tagName === "INPUT" || ev.target.tagName === "SELECT") return;
   if ($("view-player").hidden) return;
   if (ev.code === "Space") { ev.preventDefault(); video.paused ? video.play() : video.pause(); }
@@ -730,19 +678,6 @@ function niceStep(raw) {
 function fmtTime(t) {
   const m = Math.floor(t / 60), s = Math.round(t % 60);
   return `${m}:${String(s).padStart(2, "0")}`;
-}
-
-function fmtSize(bytes) {
-  if (bytes > 1e9) return `${(bytes / 1e9).toFixed(2)} GB`;
-  if (bytes > 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
-  return `${(bytes / 1e3).toFixed(0)} kB`;
-}
-
-function el(tag, cls, text) {
-  const n = document.createElement(tag);
-  if (cls) n.className = cls;
-  if (text != null) n.textContent = text;
-  return n;
 }
 
 /* ---------- Klick zum Spulen ---------- */

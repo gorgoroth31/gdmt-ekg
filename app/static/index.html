@@ -25,9 +25,7 @@
       <div class="card pick-card" id="card-video">
         <h2>1 · Video auswählen</h2>
         <p class="hint">Aufzeichnung des Spiels (z.&nbsp;B. MP4 oder WebM)</p>
-        <div class="pick-value empty" id="pick-video-label">Noch kein Video gewählt</div>
-        <button class="btn btn-primary" id="btn-pick-video">Aus Dateisystem wählen…</button>
-        <div class="or-sep">oder</div>
+        <div class="pick-value empty" id="pick-video-label">Noch kein Video hochgeladen</div>
         <div class="dropzone" id="drop-video">
           <svg class="dz-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-5H3v5a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-5h-2zM11 5.83 8.41 8.41 7 7l5-5 5 5-1.41 1.41L13 5.83V16h-2V5.83z"/></svg>
           <b>Video hierher ziehen</b>
@@ -38,9 +36,7 @@
       <div class="card pick-card" id="card-ecg">
         <h2>2 · EKG-Daten auswählen</h2>
         <p class="hint">SCP-Dateien und README.TXT des Geräts</p>
-        <div class="pick-value empty" id="pick-ecg-label">Noch kein Ordner gewählt</div>
-        <button class="btn btn-primary" id="btn-pick-ecg">Aus Dateisystem wählen…</button>
-        <div class="or-sep">oder</div>
+        <div class="pick-value empty" id="pick-ecg-label">Noch keine EKG-Dateien hochgeladen</div>
         <div class="dropzone" id="drop-ecg">
           <svg class="dz-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-5H3v5a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-5h-2zM11 5.83 8.41 8.41 7 7l5-5 5 5-1.41 1.41L13 5.83V16h-2V5.83z"/></svg>
           <b>SCP-Dateien + README.TXT hierher ziehen</b>
@@ -56,6 +52,7 @@
     </section>
     <div class="start-row">
       <button class="btn btn-accent btn-big" id="btn-start" disabled>Wiedergabe starten</button>
+      <button class="btn btn-ghost" id="btn-clear" title="Hochgeladene Dateien entfernen und Auswahl zurücksetzen">Cache löschen</button>
     </div>
   </main>
 
@@ -109,22 +106,6 @@
     </section>
     <p class="footnote" id="footnote"></p>
   </main>
-
-  <!-- ================= Datei-Browser ================= -->
-  <div class="modal-backdrop" id="modal" hidden>
-    <div class="modal card">
-      <div class="modal-head">
-        <h2 id="modal-title">Datei auswählen</h2>
-        <button class="btn btn-ghost" id="modal-close">×</button>
-      </div>
-      <div class="breadcrumb" id="breadcrumb"></div>
-      <div class="browser-list" id="browser-list"></div>
-      <div class="modal-foot">
-        <span id="modal-status" class="muted"></span>
-        <button class="btn btn-accent" id="modal-folder-confirm" hidden>Diesen Ordner verwenden</button>
-      </div>
-    </div>
-  </div>
 
   <script src="/static/app.js"></script>
 </body>
