@@ -1,0 +1,14 @@
+services:
+  ekg-player:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Wurzel des Dateibrowsers im Container (per Volumes einbinden)
+      DATA_ROOT: /data
+    volumes:
+      # Videos hier ablegen (Ordner wird automatisch erstellt)
+      - ./videos:/data/videos
+      # Rohdaten des EKG-Geräts (Schreibschutz)
+      - ./beispieldaten:/data/beispieldaten:ro
+    restart: unless-stopped

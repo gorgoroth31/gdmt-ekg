@@ -1,0 +1,8 @@
+.venv
+.git
+__pycache__
+*.pyc
+img
+videos
+data
+.beispieldaten-backup
