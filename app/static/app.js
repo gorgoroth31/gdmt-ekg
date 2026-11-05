@@ -38,13 +38,10 @@ async function api(path) {
 
 /* ================= Upload (Drag & Drop / Klick) ================= */
 function wireDropzone(zoneId, inputId, onFiles) {
+  // Die Zone ist ein <label for=…> im HTML: der Klick aktiviert das
+  // file-Input nativ (ohne JS). Hier bleiben nur Drag & Drop und Upload.
   const zone = $(zoneId);
   const input = $(inputId);
-  // Klick auf die Zone öffnet den Dateidialog. e.target-Wächter verhindert
-  // Rekursion: der synthetische Klick auf das Input bubbelt zur Zone zurück.
-  zone.addEventListener("click", (e) => {
-    if (e.target !== input) input.click();
-  });
   input.addEventListener("change", () => {
     if (input.files.length) onFiles(input.files);
     input.value = "";
