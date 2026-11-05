@@ -10,7 +10,7 @@ import shutil
 import threading
 import time
 
-from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -157,10 +157,21 @@ def upload_video(file: UploadFile = File(...)) -> dict:
 
 
 @app.post("/api/upload/ecg")
-def upload_ecg(files: list[UploadFile] = File(...)) -> dict:
-    """SCP-Dateien (und optional README.TXT) als EKG-Datensatz hochladen."""
-    session = secrets.token_hex(6)
-    dest_dir = os.path.join(UPLOAD_DIR, f"e-{session}")
+def upload_ecg(
+    files: list[UploadFile] = File(...), session: str | None = Form(None)
+) -> dict:
+    """SCP-Dateien und/oder README.TXT in eine Upload-Session hochladen.
+
+    Ohne 'session' wird eine neue Session angelegt; mit 'session' werden
+    die Dateien in die bestehende Session eingefügt (z. B. erst SCP-Dateien,
+    später die README.TXT). Die Messungserkennung erfolgt später über
+    /api/measurements, sobald SCP-Dateien vorliegen.
+    """
+    if session is None:
+        session = f"e-{secrets.token_hex(6)}"
+    elif not re.fullmatch(r"e-[0-9a-f]{6,32}", session):
+        raise HTTPException(status_code=400, detail="Ungültige Session-ID")
+    dest_dir = os.path.join(UPLOAD_DIR, session)
     saved: list[str] = []
     for f in files:
         name = os.path.basename(f.filename or "")
@@ -172,9 +183,13 @@ def upload_ecg(files: list[UploadFile] = File(...)) -> dict:
                 status_code=400,
                 detail=f"'{name}' wird ignoriert: nur .scp-Dateien und README.TXT",
             )
-    if not any(s.lower().endswith(".scp") for s in saved):
-        raise HTTPException(status_code=400, detail="Keine .scp-Dateien im Upload")
-    return {"path": _rel(dest_dir), "files": sorted(saved)}
+    scp_count = sum(1 for s in saved if s.lower().endswith(".scp"))
+    return {
+        "path": _rel(dest_dir),
+        "session": session,
+        "files": sorted(saved),
+        "scp_count": scp_count,
+    }
 
 
 @app.get("/api/measurements")

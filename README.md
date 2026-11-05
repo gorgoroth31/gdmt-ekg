@@ -78,7 +78,7 @@ Danach im Browser öffnen: <http://localhost:8000>
 ### Bedienung
 
 1. **Video auswählen**: Datei im eingebauten Dateibrowser wählen **oder** direkt im Browser hochladen (Drag & Drop bzw. Klick auf die Upload-Zone).
-2. **EKG-Daten auswählen**: Ordner mit den SCP-Dateien wählen **oder** die SCP-Dateien zusammen mit der `README.TXT` des Geräts per Drag & Drop hochladen (Mehrfachauswahl). Die der Messung zugehörigen Dateien werden anhand der `README.TXT` ermittelt ("From–To"); bei mehreren Messungen kann die Messung im Dropdown gewählt werden. Hochgeladene Dateien landen im Ordner `uploads/` (werden nach 24 Stunden automatisch bereinigt).
+2. **EKG-Daten auswählen**: Ordner mit den SCP-Dateien wählen **oder** die SCP-Dateien zusammen mit der `README.TXT` des Geräts per Drag & Drop hochladen (Mehrfachauswahl). Die Uploads landen in einer **Session** unter `uploads/`: Dateien können auch in mehreren Schritten hochgeladen werden — z. B. erst nur die `README.TXT` und später die zugehörigen `.scp`-Dateien (solange keine SCP-Dateien vorliegen, erscheint ein Hinweis und die Messungsliste aktualisiert sich nach jedem Upload). Die der Messung zugehörigen Dateien werden anhand der `README.TXT` ermittelt ("From–To"); ohne `README.TXT` werden alle hochgeladenen SCP-Dateien als eine Messung interpretiert. Hochgeladene Dateien werden nach 24 Stunden automatisch bereinigt.
 3. **Wiedergabe starten**: Das Video läuft mit normalen Player-Controls; darunter läuft synchron die EKG-Auswertung.
 
 Darstellungs-Modi (Tabs unter dem Video):

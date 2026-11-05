@@ -4,6 +4,7 @@
 const state = {
   videoPath: null,
   ecgFolder: null,
+  ecgSession: null,     // Upload-Session-ID (mehrerer Uploads in denselben Ordner)
   recordNo: null,
   records: [],
   data: null,          // /api/ecg Payload
@@ -115,6 +116,7 @@ $("btn-pick-video").onclick = () => openBrowser("video");
 $("btn-pick-ecg").onclick = () => openBrowser("folder");
 $("modal-folder-confirm").onclick = () => {
   state.ecgFolder = browser.path;
+  state.ecgSession = null;
   $("pick-ecg-label").textContent = state.ecgFolder || "/ (Datenordner)";
   $("pick-ecg-label").classList.remove("empty");
   closeBrowser();
@@ -180,25 +182,23 @@ wireDropzone("drop-video", "file-video", async (files) => {
 wireDropzone("drop-ecg", "file-ecg", async (files) => {
   const zone = $("drop-ecg");
   const fd = new FormData();
-  let scps = 0;
   for (const f of files) {
     const ok = /\.(scp|txt)$/i.test(f.name);
     if (!ok) {
       alert(`'${f.name}' wird nicht unterstützt: nur .scp-Dateien und README.TXT`);
       return;
     }
-    if (/\.scp$/i.test(f.name)) scps++;
     fd.append("files", f, f.name);
   }
-  if (!scps) {
-    alert("Bitte mindestens eine .scp-Datei hochladen");
-    return;
-  }
+  if (state.ecgSession) fd.append("session", state.ecgSession);
   try {
     const res = await uploadJson("/api/upload/ecg", fd, zone);
+    state.ecgSession = res.session;
     state.ecgFolder = res.path;
+    const readme = res.files.some((f) => f.toLowerCase() === "readme.txt");
     $("pick-ecg-label").textContent =
-      `${res.files.length} Dateien hochgeladen (${res.files.join(", ")})`;
+      `Upload-Session: ${res.files.length} Datei${res.files.length > 1 ? "en" : ""}` +
+      ` (${res.scp_count} × SCP${readme ? " + README.TXT" : ""})`;
     $("pick-ecg-label").classList.remove("empty");
     await loadRecords();
   } catch (e) {
@@ -230,7 +230,11 @@ async function loadRecords() {
     state.records = res.records;
     if (!res.records.length) {
       note.hidden = false;
-      note.textContent = "In diesem Ordner wurden keine SCP-Dateien gefunden.";
+      note.textContent = state.ecgSession
+        ? "Noch keine SCP-Dateien in der Upload-Session: einfach weitere Dateien " +
+          "in die Upload-Zone ziehen (z. B. noch die SCP-Dateien) — danach erscheint " +
+          "die Messung automatisch hier."
+        : "In diesem Ordner wurden keine SCP-Dateien gefunden.";
       refreshStart();
       return;
     }
