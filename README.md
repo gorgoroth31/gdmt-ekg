@@ -77,8 +77,8 @@ Danach im Browser öffnen: <http://localhost:8000>
 
 ### Bedienung
 
-1. **Video auswählen**: Datei im eingebauten Dateibrowser wählen.
-2. **EKG-Ordner auswählen**: Ordner mit den SCP-Dateien wählen (z. B. `beispieldaten`). Die der Messung zugehörigen Dateien werden anhand der `README.TXT` des Geräts ermittelt ("From–To"); bei mehreren Messungen kann die Messung im Dropdown gewählt werden.
+1. **Video auswählen**: Datei im eingebauten Dateibrowser wählen **oder** direkt im Browser hochladen (Drag & Drop bzw. Klick auf die Upload-Zone).
+2. **EKG-Daten auswählen**: Ordner mit den SCP-Dateien wählen **oder** die SCP-Dateien zusammen mit der `README.TXT` des Geräts per Drag & Drop hochladen (Mehrfachauswahl). Die der Messung zugehörigen Dateien werden anhand der `README.TXT` ermittelt ("From–To"); bei mehreren Messungen kann die Messung im Dropdown gewählt werden. Hochgeladene Dateien landen im Ordner `uploads/` (werden nach 24 Stunden automatisch bereinigt).
 3. **Wiedergabe starten**: Das Video läuft mit normalen Player-Controls; darunter läuft synchron die EKG-Auswertung.
 
 Darstellungs-Modi (Tabs unter dem Video):
@@ -110,7 +110,8 @@ http://localhost:8000/?video=videos/kampf.mp4&ecg=beispieldaten&record=1&offset=
   Integration, adaptive Schwellwerte mit Refraktärzeit und Searchback; danach
   Herzfrequenz aus den RR-Intervallen. Validierung gegen die Geräte-Marken der
   Beispieldaten: 94 % Übereinstimmung, mittlere Lageabweichung ca. 1 Sample.
-- `app/main.py` – FastAPI-Backend: Dateibrowser, Messungs-Erkennung,
+- `app/main.py` – FastAPI-Backend: Dateibrowser, Upload-Endpoints (Dateien landen
+  unter `/data/uploads`, Bereinigung nach 24 Stunden), Messungs-Erkennung,
   Analyse-Endpoint, Video-Streaming mit HTTP-Range (Spulen), statisches Frontend
   (Dark Mode, abgerundete Ecken) in `app/static/`.
 

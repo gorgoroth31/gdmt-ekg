@@ -11,4 +11,6 @@ services:
       - ./videos:/data/videos
       # Rohdaten des EKG-Geräts (Schreibschutz)
       - ./beispieldaten:/data/beispieldaten:ro
+      # Manuell über die Weboberfläche hochgeladene Dateien
+      - ./uploads:/data/uploads
     restart: unless-stopped

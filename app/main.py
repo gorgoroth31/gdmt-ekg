@@ -5,9 +5,12 @@ from __future__ import annotations
 import mimetypes
 import os
 import re
+import secrets
+import shutil
 import threading
+import time
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -16,14 +19,39 @@ from .scp_reader import DEFAULT_FS, RecordInfo, discover_records, load_measureme
 
 DATA_ROOT = os.environ.get("DATA_ROOT", "/data")
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+UPLOAD_DIR = os.path.join(DATA_ROOT, "uploads")
+UPLOAD_MAX_AGE_S = 24 * 3600
 
 VIDEO_EXTS = {".mp4", ".webm", ".mov", ".mkv", ".avi", ".m4v"}
+ECG_FILE_OK = (".scp",)
 
 app = FastAPI(title="gdmt-ekg")
 
 _lock = threading.Lock()
 _record_cache: dict[tuple[str, str], tuple[RecordInfo, object]] = {}
 _analysis_cache: dict[str, dict] = {}
+
+
+def _prune_uploads() -> None:
+    """Hochgeladene Dateien älter als UPLOAD_MAX_AGE_S entfernen."""
+    try:
+        if not os.path.isdir(UPLOAD_DIR):
+            return
+        for name in os.listdir(UPLOAD_DIR):
+            p = os.path.join(UPLOAD_DIR, name)
+            try:
+                if (
+                    os.path.isdir(p)
+                    and os.path.getmtime(p) < time.time() - UPLOAD_MAX_AGE_S
+                ):
+                    shutil.rmtree(p)
+            except OSError:
+                pass
+    except OSError:
+        pass
+
+
+_prune_uploads()
 
 
 def _abs(path: str) -> str:
@@ -98,6 +126,55 @@ def browse(path: str = "") -> dict:
         "parent": _rel(os.path.dirname(full)) if _rel(full) else None,
         "entries": entries,
     }
+
+
+def _save_upload(upload: UploadFile, dest_dir: str) -> str:
+    """Upload-Datei unter dest_dir ablegen, Rückgabe des Zielpfads."""
+    name = os.path.basename(upload.filename or "").strip()
+    if not name or name.startswith("."):
+        raise HTTPException(status_code=400, detail="Ungültiger Dateiname")
+    os.makedirs(dest_dir, exist_ok=True)
+    dest = os.path.join(dest_dir, name)
+    with open(dest, "wb") as out:
+        while chunk := upload.file.read(1 << 16):
+            out.write(chunk)
+    return dest
+
+
+@app.post("/api/upload/video")
+def upload_video(file: UploadFile = File(...)) -> dict:
+    """Video manuell hochladen; liefert den Pfad für /api/video zurück."""
+    name = os.path.basename(file.filename or "")
+    ext = os.path.splitext(name)[1].lower()
+    if ext not in VIDEO_EXTS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Nicht unterstütztes Videoformat '{ext or '—'}' (erlaubt: {', '.join(sorted(VIDEO_EXTS))})",
+        )
+    session = secrets.token_hex(6)
+    dest = _save_upload(file, os.path.join(UPLOAD_DIR, f"v-{session}"))
+    return {"path": _rel(dest), "name": os.path.basename(dest)}
+
+
+@app.post("/api/upload/ecg")
+def upload_ecg(files: list[UploadFile] = File(...)) -> dict:
+    """SCP-Dateien (und optional README.TXT) als EKG-Datensatz hochladen."""
+    session = secrets.token_hex(6)
+    dest_dir = os.path.join(UPLOAD_DIR, f"e-{session}")
+    saved: list[str] = []
+    for f in files:
+        name = os.path.basename(f.filename or "")
+        lower = name.lower()
+        if lower.endswith(ECG_FILE_OK) or lower == "readme.txt":
+            saved.append(os.path.basename(_save_upload(f, dest_dir)))
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"'{name}' wird ignoriert: nur .scp-Dateien und README.TXT",
+            )
+    if not any(s.lower().endswith(".scp") for s in saved):
+        raise HTTPException(status_code=400, detail="Keine .scp-Dateien im Upload")
+    return {"path": _rel(dest_dir), "files": sorted(saved)}
 
 
 @app.get("/api/measurements")

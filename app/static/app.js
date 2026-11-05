@@ -121,6 +121,91 @@ $("modal-folder-confirm").onclick = () => {
   loadRecords();
 };
 
+/* ================= Upload (Drag & Drop / Klick) ================= */
+function wireDropzone(zoneId, inputId, onFiles) {
+  const zone = $(zoneId);
+  const input = $(inputId);
+  zone.addEventListener("click", () => input.click());
+  input.addEventListener("change", () => {
+    if (input.files.length) onFiles(input.files);
+    input.value = "";
+  });
+  ["dragenter", "dragover"].forEach((ev) =>
+    zone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      zone.classList.add("dragover");
+    })
+  );
+  ["dragleave", "drop"].forEach((ev) =>
+    zone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      zone.classList.remove("dragover");
+    })
+  );
+  zone.addEventListener("drop", (e) => {
+    if (e.dataTransfer.files.length) onFiles(e.dataTransfer.files);
+  });
+}
+
+async function uploadJson(url, formData, zone) {
+  zone.classList.add("busy");
+  try {
+    const res = await fetch(url, { method: "POST", body: formData });
+    if (!res.ok) {
+      let msg = `HTTP ${res.status}`;
+      try { msg = (await res.json()).detail ?? msg; } catch (_e) { /* ignore */ }
+      throw new Error(msg);
+    }
+    return await res.json();
+  } finally {
+    zone.classList.remove("busy");
+  }
+}
+
+wireDropzone("drop-video", "file-video", async (files) => {
+  const zone = $("drop-video");
+  const fd = new FormData();
+  fd.append("file", files[0]);
+  try {
+    const res = await uploadJson("/api/upload/video", fd, zone);
+    state.videoPath = res.path;
+    $("pick-video-label").textContent = `${res.name} (hochgeladen)`;
+    $("pick-video-label").classList.remove("empty");
+    refreshStart();
+  } catch (e) {
+    alert(`Upload fehlgeschlagen: ${e.message}`);
+  }
+});
+
+wireDropzone("drop-ecg", "file-ecg", async (files) => {
+  const zone = $("drop-ecg");
+  const fd = new FormData();
+  let scps = 0;
+  for (const f of files) {
+    const ok = /\.(scp|txt)$/i.test(f.name);
+    if (!ok) {
+      alert(`'${f.name}' wird nicht unterstützt: nur .scp-Dateien und README.TXT`);
+      return;
+    }
+    if (/\.scp$/i.test(f.name)) scps++;
+    fd.append("files", f, f.name);
+  }
+  if (!scps) {
+    alert("Bitte mindestens eine .scp-Datei hochladen");
+    return;
+  }
+  try {
+    const res = await uploadJson("/api/upload/ecg", fd, zone);
+    state.ecgFolder = res.path;
+    $("pick-ecg-label").textContent =
+      `${res.files.length} Dateien hochgeladen (${res.files.join(", ")})`;
+    $("pick-ecg-label").classList.remove("empty");
+    await loadRecords();
+  } catch (e) {
+    alert(`Upload fehlgeschlagen: ${e.message}`);
+  }
+});
+
 document.addEventListener("keydown", (ev) => {
   if (ev.key === "Escape" && !$("modal").hidden) closeBrowser();
   if (!$("modal").hidden) return;
