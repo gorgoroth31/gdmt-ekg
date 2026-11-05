@@ -306,6 +306,15 @@ def video(path: str, request: Request):
     return FileResponse(full, media_type=media_type)
 
 
+@app.middleware("http")
+async def _caching_header(request: Request, call_next):
+    """HTML und statische Assets immer neu validieren, keine veralteten Stände im Browser."""
+    response = await call_next(request)
+    if request.url.path == "/" or request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 @app.get("/")
 def index() -> FileResponse:
     return FileResponse(os.path.join(STATIC_DIR, "index.html"))

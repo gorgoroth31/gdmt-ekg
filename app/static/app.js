@@ -40,7 +40,11 @@ async function api(path) {
 function wireDropzone(zoneId, inputId, onFiles) {
   const zone = $(zoneId);
   const input = $(inputId);
-  zone.addEventListener("click", () => input.click());
+  // Klick auf die Zone öffnet den Dateidialog. e.target-Wächter verhindert
+  // Rekursion: der synthetische Klick auf das Input bubbelt zur Zone zurück.
+  zone.addEventListener("click", (e) => {
+    if (e.target !== input) input.click();
+  });
   input.addEventListener("change", () => {
     if (input.files.length) onFiles(input.files);
     input.value = "";
