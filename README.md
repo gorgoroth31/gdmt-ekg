@@ -49,6 +49,12 @@ Mit einem EKG-Gerät soll die Herzfrequenz während eines Videospiels gemessen u
 
 # Ergebnisse
 
+## Ereignisse im Spiel
+
+- 3 min: Kampfbeginn -> Aufregung ist zu erkennen
+- 8 min: erster Tod
+- 13 min: zweiter Tod
+- 20:50: Sieg
 - Darstellung in selbst geschriebener (AI-assisted) Anwendung, die Video abspielen lässt und parallel dazu die Herzfrequenz darstellt.
 - Anwendung soll mit docker compose ausführbar sein
 - gleitender Mittelwert über kleine Fenster (30 sek -> ermitteln bis typische Schwankung)
