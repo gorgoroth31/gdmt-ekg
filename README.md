@@ -49,26 +49,24 @@ Mit einem EKG-Gerät soll die Herzfrequenz während eines Videospiels gemessen u
 
 # Ergebnisse
 
+- unter /messwerte sind die realen Messwerte zu finden, die in genau dieser Form auch auf dem EKG gespeichert waren
+- das Video ist unter <https://app-share.mailbox.org/appsuite/api/share/0cb504830d63a550cae4e23d63a5460a8f17a20220540f83/1/8/MjM0/MjM0LzI2NjA> zur Verfügung gestellt - leider gab es ein Problem mit dem Videoaufnahmeprogramm OBS, weswegen ab 5:14 ein andauerndes Standbild zu sehen ist. In der Vorbereitung wurde derselbe Fehler bereits nach wenigen Sekunden erkannt, nach einem Fix trat der Fehler jedoch beim Test nicht auf. Schränkt die Auswertung jedoch nur minimal ein, da das Auftreten bestimmter Ereignisse (siehe nächster Punkt) mitgeschrieben wurde
+
 ## Ereignisse im Spiel
 
+- in [[img/Auswertung/Herzfrequenz (45 sek Filter) - Ereignisse.png]] mit Linien dargestellt
 - 3 min: Kampfbeginn -> Aufregung ist zu erkennen
 - 8 min: erster Tod
 - 13 min: zweiter Tod
 - 20:50: Sieg
 - Darstellung in selbst geschriebener (AI-assisted) Anwendung, die Video abspielen lässt und parallel dazu die Herzfrequenz darstellt.
 - Anwendung soll mit docker compose ausführbar sein
-- gleitender Mittelwert über kleine Fenster (30 sek -> ermitteln bis typische Schwankung)
-- in literatur nachlesen, wie Herzfrequenz ermittelt werden soll über die Zeit
-- zuerst ausprobieren, wie die Auswertung passieren soll
-- statistischer Test sollte im idealfall nur einmal stattfinden (in Forschungsarbeit)
-- Linie zeigt 5 sek früher und später
-- auch ableitung?
 
-## Anwendung (EKG-Player)
+## Web-App (EKG-Player)
 
-Web-Anwendung, die eine Videoaufzeichnung des Spiels und die parallel aufgenommene
-EKG-Messung synchron abspielt, um Spielereignisse (Kampf, Tod des Spielers, Sieg)
+- Web-Anwendung, die eine Videoaufzeichnung des Spiels und die parallel aufgenommene EKG-Messung synchron abspielt, um Spielereignisse (Kampf, Tod des Spielers, Sieg)
 mit der Herzfrequenz in Beziehung zu setzen.
+- Daten im SCP-Format müssen vom EKG-Gerät auf den Rechner geladen werden, damit sie in die Anwendung hochgeladen werden können
 
 ### Starten
 
@@ -134,6 +132,9 @@ http://localhost:8000/?video=videos/kampf.mp4&ecg=beispieldaten&record=1&offset=
   angezeigt wird in ADC-Einheiten.
 
 # Diskussion
+
+- es sind bestimmte Ereignisse, wie z.B. die Aufregung kurz vor Kampfbeginn (bei 3 min.) zu erkennnen, da kurz davor die Herzfrequenz merklich ansteigt
+- nach dem Sieg bei minute 20:50 ist zu erkennen, dass die Herzfrequenz weniger Ausschläge hat und sich wieder normalisiert
 
 # Quellen
 
