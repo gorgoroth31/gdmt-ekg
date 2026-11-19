@@ -1,6 +1,25 @@
 # gdmt-ekg
 
-Projektarbeit im Modul 'Grundlagen der Medizintechnik' über die Messung und Auswertung von EKG-Daten während eines Videospieles um bestimmte Spielereignisse in der Herzfrequenz zu erkennen. Bestimmte Spiele, die vor allem auf Kämpfe gegen Gegner mit komplizierten Mechaniken ausgelegt sind, erfordern ein hohes Maß an Konzentration und einem Anstieg der Herzfrequenz [(1)](#quellen). Diese Arbeit untersucht weitergehend, ob bestimmte Ereignisse, wie z.B. Tod des Spielers, Pausierung des Kampfes oder Tod des Gegners in dem Spiel 'Hollow Knight' einen Einfluss auf die Herzfrequenz haben können.
+In dieser Projektarbeit im Modul 'Grundlagen der Medizintechnik' wird untersucht, inwiefern bestimmte Spielereignisse während eines Videospieles im Verlauf der Herzfrequenz erkannt werden können. Bestimmte Spiele, die vor allem auf Kämpfe gegen Gegner mit komplizierten Mechaniken ausgelegt sind, erfordern ein hohes Maß an Konzentration und einem Anstieg der Herzfrequenz [(1)](#quellen). Diese Arbeit untersucht weitergehend, ob bestimmte Ereignisse, wie z.B. Tod des Spielers, Pausierung des Kampfes oder Tod des Gegners in dem Spiel 'Hollow Knight' einen Einfluss auf die Herzfrequenz haben können.
+
+# Material und Methoden 
+
+- Welche Art Forschung? 
+  - Um herauszufinden, inwiefern bestimmte Ereignisse in einem Videospiel, wie z.B. Tod des Spielers oder der Sieg, auf die Herzfrequenz des Spielers einwirken, wurde eine qualitative Forschung durchgeführt.
+- Wie wurden die Daten erhoben? 
+  - Für diese Arbeit wurde die Herzfrequenz mit einem 3-Kanal-EKG gemessen, während der Proband den Kampf "Trial of the Warrior" in dem Videospiel "Hollow Knight" spielt. Während der Messung wird der Bildschirm aufgezeichnet um bei der Auswertung Rückschlüsse auf die Ereignisse im Kampf ziehen zu können.
+- Welche Eigenschaft haben die erhobenen Daten?
+  - Um die Herzfrequenz graphisch darstellen zu können, wurden die .SCP-Daten vom EKG-Gerät auf den Rechner geladen. In SCP liegen die Daten in einem binären Format vor und dient dem Austausch der Daten zwischen digital EKG-Geräten und EKG Host Systemen, wie z.B. Desktop Anwendungen um die Herzfrequenz darzustellen [2](#quellen).
+- Einschlusskriterien:
+  - keine Koffeineinnahme in den 8 Stunden vor Durchführung des Versuchs
+  - da dieser Versuch von vornherein beinhaltet, dass ich der Proband bin, gibt es keine besonderen formalen Einschlusskriterien
+- Ausschlusskriterien:
+  - Koffeineinnahme in den 8 Stunden vor Durchführung des Versuchs 
+- Wie wurde die Messung durchgeführt?
+  - An einem Abend in der ersten Woche vom November 2026 wurde der Versuch durchgeführt. Das Protokoll, sowie die Software zur Auswertung der Daten wurden vorab erstellt. Es war eine assistierende Person anwesend, um zum einen die Einhaltung des Protokolls zu überwachen und zum anderen bei der Zeitmessung zu assistieren.
+- Wie wurden die Daten analysiert?
+  - nur "nach Gefühl" -> in der Anwendung wurden die Daten eingelesen und Kurven, die ähnlich aussahen wurden miteinander verglichen (graphisch, nicht quantitativ) und mit den Ereignissen im Spiel verglichen 
+  - hier muss ich noch überlegen, wie ich das am besten löse 
 
 # Vorbereitung
 
@@ -139,3 +158,4 @@ http://localhost:8000/?video=videos/kampf.mp4&ecg=beispieldaten&record=1&offset=
 # Quellen
 
 - [1] : ValladÃo SP, Middleton J, Andre TL. Esport: Fortnite Acutely Increases Heart Rate of Young Men. Int J Exerc Sci. 2020 Sep 1;13(6):1217-1227. doi: 10.70252/ZXZG4481. PMID: 33042380; PMCID: PMC7523899.
+- [2]: Trigo, J.D., Álesanco, Á., Martínez, I., & García, J. (2012). A Review on Digital ECG Formats and the Relationships Between Them. IEEE Transactions on Information Technology in Biomedicine, 16, 432-444. 
